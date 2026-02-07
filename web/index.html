@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sanguchería - Debug Chat</title>
+    <style>
+      body { font-family: sans-serif; max-width: 900px; margin: 20px auto; }
+      #chat { border: 1px solid #ddd; padding: 12px; min-height: 320px; margin-bottom: 12px; white-space: pre-wrap; }
+      .row { margin: 8px 0; }
+      input, button { padding: 8px; }
+      #message { width: 70%; }
+      #debug { background: #f7f7f7; padding: 12px; font-size: 12px; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <h1>Debug local - WhatsApp assistant</h1>
+    <div class="row">
+      <label>Conversation ID:</label>
+      <input id="conv" value="demo-1" />
+    </div>
+    <div id="chat"></div>
+    <div class="row">
+      <input id="message" placeholder="Escribí un mensaje..." />
+      <button onclick="sendMsg()">Enviar</button>
+    </div>
+    <h3>Estado de debug</h3>
+    <pre id="debug"></pre>
+
+    <script>
+      const chatEl = document.getElementById('chat');
+      const debugEl = document.getElementById('debug');
+
+      function addLine(who, text) {
+        chatEl.textContent += `${who}: ${text}\n`;
+      }
+
+      async function sendMsg() {
+        const conversation_id = document.getElementById('conv').value;
+        const message = document.getElementById('message').value;
+        if (!message.trim()) return;
+
+        addLine('Cliente', message);
+        document.getElementById('message').value = '';
+
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversation_id, message })
+        });
+        const data = await res.json();
+
+        addLine('Bot', data.reply);
+        debugEl.textContent = JSON.stringify(data.order, null, 2);
+      }
+    </script>
+  </body>
+</html>
