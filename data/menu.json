@@ -1,0 +1,65 @@
+{
+  "products": {
+    "lomo": {
+      "display_name": "Lomo",
+      "supports_special": true,
+      "default_components": [],
+      "allowed_condiments": [
+        "mayonesa",
+        "ketchup",
+        "mostaza",
+        "salsa golf",
+        "picante"
+      ]
+    },
+    "choripan": {
+      "display_name": "Choripán",
+      "supports_special": true,
+      "default_components": [],
+      "allowed_condiments": [
+        "mayonesa",
+        "ketchup",
+        "mostaza",
+        "salsa golf",
+        "picante"
+      ]
+    },
+    "hamburguesa": {
+      "display_name": "Hamburguesa",
+      "supports_special": true,
+      "default_components": [],
+      "allowed_condiments": [
+        "mayonesa",
+        "ketchup",
+        "mostaza",
+        "salsa golf",
+        "picante"
+      ]
+    },
+    "molleja": {
+      "display_name": "Molleja",
+      "supports_special": true,
+      "default_components": [],
+      "requires_stock_check": true,
+      "allowed_condiments": [
+        "mayonesa",
+        "ketchup",
+        "mostaza",
+        "salsa golf",
+        "picante"
+      ]
+    },
+    "carlitos": { "display_name": "Carlitos", "supports_special": false },
+    "tostado": { "display_name": "Tostado", "supports_special": false },
+    "sanguches_de_miga": { "display_name": "Sánguches de miga", "supports_special": false },
+    "primavera": { "display_name": "Primavera", "supports_special": false },
+    "cano": { "display_name": "Caño", "supports_special": false },
+    "frankfurt": { "display_name": "Frankfurt", "supports_special": false }
+  },
+  "special": {
+    "included_components": ["tomate", "lechuga", "queso"],
+    "optional_components": ["jamon"]
+  },
+  "payment_methods": ["efectivo", "transferencia"],
+  "delivery_types": ["retiro", "envio"]
+}
