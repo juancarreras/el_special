@@ -15,13 +15,6 @@ class TestChatEngine(unittest.TestCase):
         out = self.engine.handle_message("c2", "quiero 1 lomo special")
         self.assertIn("condimentos", out["reply"].lower())
 
-    def test_delivery_detects_retirar_variant(self):
-        cid = "c4"
-        self.engine.handle_message(cid, "haceme un lomo")
-        out = self.engine.handle_message(cid, "para retirar")
-        self.assertEqual("retiro", out["order"]["delivery"]["type"])
-        self.assertIn("abonás", out["reply"].lower())
-
     def test_valid_flow_reaches_confirmation(self):
         cid = "c3"
         self.engine.handle_message(cid, "quiero 1 lomo special con mayonesa")

@@ -87,10 +87,10 @@ class ChatEngine:
         if name_match:
             order["customer_name"] = name_match.group(1).capitalize()
 
-        # Delivery (accept common variants: retiro/retirar, envio/enviar)
-        if re.search(r"\bretir(?:o|ar)?\b", text):
+        # Delivery
+        if "retiro" in text:
             order["delivery"]["type"] = "retiro"
-        if re.search(r"\benvi(?:o|ar|á)\b", text):
+        if "envio" in text or "envío" in text:
             order["delivery"]["type"] = "envio"
         addr_match = re.search(r"(?:direccion|dirección)\s*[:\-]?\s*(.+)$", text)
         if addr_match:
