@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Breeders Genetics MVP</title>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <style>
+      body { font-family: Inter, system-ui, sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+      header { padding: 16px 20px; border-bottom: 1px solid #334155; }
+      main { display: grid; grid-template-columns: 340px 1fr; min-height: calc(100vh - 70px); }
+      aside { border-right: 1px solid #334155; padding: 14px; overflow-y: auto; }
+      section { padding: 14px; }
+      h1,h2,h3 { margin: 6px 0 10px; }
+      .card { background: #111827; border: 1px solid #334155; border-radius: 10px; padding: 10px; margin-bottom: 12px; }
+      label { display: block; font-size: 12px; margin-top: 8px; color: #93c5fd; }
+      input, textarea, select, button { width: 100%; margin-top: 4px; padding: 8px; border-radius: 8px; border: 1px solid #475569; background: #020617; color: #e2e8f0; }
+      button { background: #2563eb; cursor: pointer; font-weight: 600; }
+      .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      #cy { height: 420px; border: 1px solid #334155; border-radius: 10px; background: #020617; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 8px; border-bottom: 1px solid #334155; font-size: 13px; }
+      .muted { color: #94a3b8; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Breeders Genetics Platform · MVP funcional</h1>
+      <div class="muted">Exploración genética + árbol genealógico + trabajo de breeder (cruzas/fenotipos)</div>
+    </header>
+    <main>
+      <aside>
+        <div class="card">
+          <h3>Nuevo breeder</h3>
+          <label>Nombre</label><input id="breederName" />
+          <label>Slug</label><input id="breederSlug" />
+          <label>Bio</label><textarea id="breederBio"></textarea>
+          <button onclick="createBreeder()">Crear breeder</button>
+        </div>
+
+        <div class="card">
+          <h3>Nueva genética</h3>
+          <label>Nombre canónico</label><input id="geneticName" />
+          <label>Breeder ID</label><input id="geneticBreederId" type="number" />
+          <label>Generación</label><input id="geneticGeneration" placeholder="F1, BX1..." />
+          <label>Descripción</label><textarea id="geneticDescription"></textarea>
+          <button onclick="createGenetic()">Crear genética</button>
+        </div>
+
+        <div class="card">
+          <h3>Nueva relación genética</h3>
+          <label>From genetic ID</label><input id="relFrom" type="number" />
+          <label>To genetic ID</label><input id="relTo" type="number" />
+          <label>Tipo</label>
+          <select id="relType"><option>mother_of</option><option>father_of</option><option>backcross_of</option><option>self_of</option></select>
+          <button onclick="createRelationship()">Crear relación</button>
+        </div>
+
+        <div class="card">
+          <h3>Proyecto + cruza + batch</h3>
+          <label>Breeder ID</label><input id="projectBreeder" type="number" />
+          <label>Nombre proyecto</label><input id="projectName" />
+          <label>Objetivo</label><input id="projectObjective" />
+          <button onclick="createProject()">Crear proyecto</button>
+          <hr />
+          <label>Project ID</label><input id="crossProject" type="number" />
+          <div class="grid2">
+            <div><label>Mother ID</label><input id="crossMother" type="number" /></div>
+            <div><label>Father ID</label><input id="crossFather" type="number" /></div>
+          </div>
+          <label>Generación esperada</label><input id="crossGeneration" />
+          <label>Objetivo cruza</label><input id="crossObjective" />
+          <button onclick="createCross()">Crear cruza</button>
+          <hr />
+          <label>Project ID</label><input id="batchProject" type="number" />
+          <label>Cross ID</label><input id="batchCross" type="number" />
+          <label>Nombre batch</label><input id="batchName" />
+          <button onclick="createBatch()">Crear batch</button>
+        </div>
+      </aside>
+
+      <section>
+        <div class="card">
+          <h2>Explorador de genéticas</h2>
+          <div class="grid2">
+            <input id="searchInput" placeholder="Buscar genética por nombre" />
+            <button onclick="loadGenetics()">Buscar</button>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>Nombre</th><th>Gen</th><th>Acciones</th></tr></thead>
+            <tbody id="geneticsRows"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h2>Árbol genealógico interactivo</h2>
+          <div class="grid2">
+            <input id="treeId" placeholder="Genetic ID" type="number" />
+            <button onclick="loadTree()">Cargar árbol</button>
+          </div>
+          <div id="cy"></div>
+        </div>
+
+        <div class="card">
+          <h2>Módulo de fenotipos</h2>
+          <div class="grid2">
+            <input id="phenoBatchId" type="number" placeholder="Batch ID" />
+            <button onclick="loadPhenotypes()">Ver fenotipos</button>
+          </div>
+          <div class="grid2">
+            <input id="phenoCode" placeholder="Código fenotipo" />
+            <input id="phenoDecision" placeholder="keeper/discard/pending" />
+          </div>
+          <div class="grid2">
+            <input id="phenoAroma" type="number" step="0.1" placeholder="Aroma" />
+            <input id="phenoResin" type="number" step="0.1" placeholder="Resina" />
+          </div>
+          <div class="grid2">
+            <input id="phenoVigor" type="number" step="0.1" placeholder="Vigor" />
+            <button onclick="createPhenotype()">Agregar fenotipo</button>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>Código</th><th>Aroma</th><th>Resina</th><th>Vigor</th><th>Decisión</th></tr></thead>
+            <tbody id="phenoRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const api = '/api';
+
+      async function req(path, options = {}) {
+        const res = await fetch(`${api}${path}`, { headers: { 'Content-Type': 'application/json' }, ...options });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+      }
+
+      async function createBreeder() {
+        await req('/breeders', { method: 'POST', body: JSON.stringify({
+          name: breederName.value, slug: breederSlug.value, bio: breederBio.value || null
+        })});
+        alert('Breeder creado');
+      }
+
+      async function createGenetic() {
+        await req('/genetics', { method: 'POST', body: JSON.stringify({
+          canonical_name: geneticName.value,
+          breeder_id: geneticBreederId.value ? Number(geneticBreederId.value) : null,
+          generation: geneticGeneration.value || null,
+          description: geneticDescription.value || null,
+          visibility: 'public'
+        })});
+        alert('Genética creada');
+        loadGenetics();
+      }
+
+      async function createRelationship() {
+        await req('/relationships', { method: 'POST', body: JSON.stringify({
+          from_genetic_id: Number(relFrom.value),
+          to_genetic_id: Number(relTo.value),
+          relation_type: relType.value
+        })});
+        alert('Relación creada');
+      }
+
+      async function createProject() {
+        await req('/projects', { method: 'POST', body: JSON.stringify({
+          breeder_id: Number(projectBreeder.value), name: projectName.value, objective: projectObjective.value || null
+        })});
+        alert('Proyecto creado');
+      }
+
+      async function createCross() {
+        await req('/crosses', { method: 'POST', body: JSON.stringify({
+          project_id: Number(crossProject.value),
+          mother_genetic_id: Number(crossMother.value),
+          father_genetic_id: Number(crossFather.value),
+          generation_expected: crossGeneration.value || null,
+          objective: crossObjective.value || null
+        })});
+        alert('Cruza creada');
+      }
+
+      async function createBatch() {
+        await req('/batches', { method: 'POST', body: JSON.stringify({
+          project_id: Number(batchProject.value),
+          cross_id: batchCross.value ? Number(batchCross.value) : null,
+          name: batchName.value
+        })});
+        alert('Batch creado');
+      }
+
+      async function loadGenetics() {
+        const q = searchInput.value ? `?q=${encodeURIComponent(searchInput.value)}` : '';
+        const data = await req(`/genetics${q}`);
+        geneticsRows.innerHTML = data.map(g => `
+          <tr>
+            <td>${g.id}</td>
+            <td>${g.canonical_name}</td>
+            <td>${g.generation || '-'}</td>
+            <td><button onclick="treeId.value=${g.id};loadTree()">Ver árbol</button></td>
+          </tr>
+        `).join('');
+      }
+
+      let cy = cytoscape({
+        container: document.getElementById('cy'),
+        style: [
+          { selector: 'node', style: { 'background-color': '#3b82f6', label: 'data(label)', color: '#e2e8f0', 'font-size': 10 } },
+          { selector: 'edge', style: { 'line-color': '#64748b', 'target-arrow-shape': 'triangle', 'target-arrow-color': '#64748b', 'curve-style': 'bezier', label: 'data(relation_type)', 'font-size': 8, color: '#cbd5e1' } },
+          { selector: '.center', style: { 'background-color': '#22c55e', width: 40, height: 40 } }
+        ]
+      });
+
+      async function loadTree() {
+        const id = Number(treeId.value);
+        if (!id) return;
+        const data = await req(`/genetics/${id}/tree`);
+        const elements = [
+          ...data.nodes.map(n => ({ data: { id: String(n.id), label: `${n.label} (#${n.id})` }, classes: n.id === data.center ? 'center' : '' })),
+          ...data.edges.map(e => ({ data: { id: `e${e.id}`, source: String(e.source), target: String(e.target), relation_type: e.relation_type } }))
+        ];
+        cy.elements().remove();
+        cy.add(elements);
+        cy.layout({ name: 'breadthfirst', directed: true, spacingFactor: 1.6 }).run();
+      }
+
+      async function createPhenotype() {
+        await req('/phenotypes', { method: 'POST', body: JSON.stringify({
+          batch_id: Number(phenoBatchId.value),
+          code: phenoCode.value,
+          aroma_score: phenoAroma.value ? Number(phenoAroma.value) : null,
+          resin_score: phenoResin.value ? Number(phenoResin.value) : null,
+          vigor_score: phenoVigor.value ? Number(phenoVigor.value) : null,
+          decision: phenoDecision.value || 'pending'
+        })});
+        loadPhenotypes();
+      }
+
+      async function loadPhenotypes() {
+        const id = Number(phenoBatchId.value);
+        const rows = await req(`/batches/${id}/phenotypes`);
+        phenoRows.innerHTML = rows.map(p => `<tr><td>${p.id}</td><td>${p.code}</td><td>${p.aroma_score ?? '-'}</td><td>${p.resin_score ?? '-'}</td><td>${p.vigor_score ?? '-'}</td><td>${p.decision}</td></tr>`).join('');
+      }
+
+      loadGenetics();
+    </script>
+  </body>
+</html>
